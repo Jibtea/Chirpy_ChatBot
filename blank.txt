@@ -1,0 +1,54 @@
+if (result.length > 0) {
+        // sessionSet(0, result[0].item.raw.place, result[0].item.raw.product);
+        // console.log("session", sessions[0]);
+        // console.log("1",
+        //     result.slice(0, 5).map(r => ({
+        //         product: r.item.productName,
+        //         score: r.score
+        //     }))
+        // );
+    } 
+    // else if (sessions[0].lastContext) {
+    //     const intent = getIntent(question);
+    //     if (intent === "price") {
+    //         let answer = "ราคา" + sessions[0].currentProduct.price + "จ้า";
+    //         updateHistory(question, answer);
+    //         return res.json({
+    //             answer: answer
+    //         });
+    //     }
+    //     else if (intent === "buy") {
+    //         let answer = "ซื้อได้ที่ " + sessions[0].currentPlace.name + " นะจ๊ะ \n ลิงก์นี้เลยจ้า : " + sessions[0].currentProduct.link + " เดี๋ยวลุงพาไปนะ";
+    //         updateHistory(question, answer);
+    //         return res.json({
+    //             answer: answer,
+    //             link: sessions[0].currentProduct.link
+    //         });
+    //     } else {
+    //         result = searchData.map(item => ({
+    //             item,
+    //             score: 999
+    //         }));
+    //         console.log("4");
+    //     }
+    // } 
+    else {
+        result = fuse.search(cleanQuestion);
+        if (result.length > 0) {
+            // sessionSet(0, result[0].item.raw.place, result[0].item.raw.product);
+            // console.log("session", sessions[0]);
+            // console.log("2",
+            //     result.slice(0, 5).map(r => ({
+            //         product: r.item.productName,
+            //         score: r.score
+            //     }))
+            // );
+            // sessionSet2();
+        } else {
+            result = searchData.map(item => ({
+                item,
+                score: 999
+            }));
+            console.log("3");
+        }
+    }

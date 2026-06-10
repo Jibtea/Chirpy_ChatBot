@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+
+# env file 
+.env
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# build / runtime
+dist/
+build/
+
+# optional cache
+.cache/
+
+# local uploads (ถ้ามีอนาคต)
+uploads/
+
+# logs folder (ถ้าคุณสร้างเอง)
+logs/
+
+# runtime
+*.pid
+*.seed
+*.lock
+
+# coverage (ถ้ามี test)
+coverage/
+
+#resourcres
+resources/
