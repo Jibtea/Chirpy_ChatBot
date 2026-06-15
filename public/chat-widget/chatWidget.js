@@ -156,8 +156,8 @@ function showBuyLoading() {
 
     div.innerHTML = `
         <div class="buy-box">
-            <div class="spinner">👴🏻</div>
-            <div>ลุงกำลังพาไปหน้าซื้อให้นะ...</div>
+            <div class="spinner">🐦</div>
+            <div>เชอร์บี้กำลังพาไปหน้าซื้อให้นะ...</div>
         </div>
     `;
 

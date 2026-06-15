@@ -6,19 +6,41 @@ import { askGemini, buildPrompt } from "./services/geminiService.mjs";
 import { getSession, sessionSet, updateHistory } from "./services/sessionService.mjs";
 import { getIntent, buildContext, createFuse } from "./services/intentSearchContextService.mjs";
 
-import {normalizeQuestion , adjustScore} from "./utils/normalizeQuestion.mjs";
-import { places, searchData }from "./services/placeLoaderService.mjs";
-// import { adjustScore} from "./utils/typeScoring.mjs";
+import { normalizeQuestion, adjustScore } from "./utils/normalizeQuestion.mjs";
+import { getSearchData } from "./services/searchDataService.mjs";
 
+import { createFAQFuse, searchFAQ } from "./services/faqService.mjs";
 
 dotenv.config();
 
 const app = express();
 
+const faqFuse = await createFAQFuse();
+
 app.use(express.json());
 app.use(express.static("public"));
 
-const fuse = createFuse(searchData);
+
+// const searchData = await getSearchData();
+// const fuse = createFuse(searchData);
+//==========find by intent=========//
+const {
+    productSearchData,
+    activitySearchData,
+    placeSearchData } = await getSearchData();
+const productFuse = createFuse(productSearchData);
+
+const activityFuse = createFuse(activitySearchData);
+
+const placeFuse = createFuse(placeSearchData);
+
+const allFuse = createFuse([
+        ...productSearchData,
+        ...activitySearchData,
+        ...placeSearchData
+    ]);
+//=========================================//
+
 
 app.post("/chat", async (req, res) => {
 
@@ -37,10 +59,58 @@ app.post("/chat", async (req, res) => {
             req.body.message
         );
 
+        //=========FAQ=========//
+        const faqAnswer =
+            searchFAQ(
+                faqFuse,
+                question
+            );
+
+        if (faqAnswer) {
+
+            updateHistory(
+                sessionId,
+                question,
+                faqAnswer
+            );
+
+            return res.json({
+                answer: faqAnswer
+            });
+
+        }
+
         //========Intent================//
 
-        const intent =
-            getIntent(question);
+        const intent = getIntent(question);
+
+
+        let fuse;
+
+        switch (intent) {
+
+            case "product":
+
+                fuse = productFuse;
+                break;
+
+
+            case "activity":
+
+                fuse = activityFuse;
+                break;
+
+
+            case "place":
+
+                fuse = placeFuse;
+                break;
+
+
+            default:
+
+                fuse = allFuse;
+        }
 
         if (
             intent === "price" &&
@@ -48,15 +118,17 @@ app.post("/chat", async (req, res) => {
         ) {
 
             const answer =
-                session.lastResults.raw.productName+ "ราคา " +
-                session.lastResults.raw.product.price +
-                " จ้า";
+                session.lastResults.raw.name + "ราคา " +
+                session.lastResults.raw.price +
+                "บาทจ้า" + "ลิ้งก์นี้เลยนะ" + session.lastResults.raw.link;
 
             updateHistory(
                 sessionId,
                 question,
                 answer
             );
+
+            console.log("price");
 
             return res.json({
                 answer
@@ -69,20 +141,21 @@ app.post("/chat", async (req, res) => {
         ) {
 
             const answer =
-                `ซื้อได้ที่ ${session.lastResults.placeName} นะจ๊ะ\n` +
-                `ลิงก์นี้เลยจ้า : ${session.lastResults.raw.product.link} เดี๋ยวลุงพาไปนะ`;
+                `ซื้อได้ที่ ${session.lastResults.raw.name} นะ\n` +
+                `ลิงก์นี้เลยจิ๊บ : ${session.lastResults.raw.link} เดี๋ยวเชอรปี้พาไปนะจิ๊บๆ`;
 
             updateHistory(
                 sessionId,
                 question,
                 answer
             );
+            console.log("buy");
 
             return res.json({
                 answer,
                 link:
-                    session.lastResults
-                        .raw.product.link
+                    session.lastResults.raw
+                        .link
             });
         }
 
@@ -91,9 +164,9 @@ app.post("/chat", async (req, res) => {
         let result =
             fuse.search(question);
 
-        if ( result.length === 0 ) {
+        if (result.length === 0) {
             result = fuse.search(cleanQuestion);
-        }if ( result.length === 0 ) {
+        } if (result.length === 0) {
             result =
                 searchData.map(
                     item => ({
@@ -110,7 +183,7 @@ app.post("/chat", async (req, res) => {
                 result,
                 question
             );
-        console.log("result",result);
+        console.log("result", result);
 
         //==============Session Set==========//
 
@@ -128,7 +201,7 @@ app.post("/chat", async (req, res) => {
                 .map(
                     chat =>
                         `ผู้ใช้: ${chat.question}
-ลุง: ${chat.answer}`
+เชอร์บี้: ${chat.answer}`
                 )
                 .join("\n\n");
 
@@ -167,7 +240,7 @@ app.post("/chat", async (req, res) => {
 
         return res.status(500).json({
             answer:
-                "ขอโทษนะตอนนี้ลุงยุ่งอยู่ ลองใหม่อีกทีได้ไหมจ๊ะ",
+                "ขอโทษนะตอนนี้เชอร์บี้ยุ่งอยู่ ลองใหม่อีกทีได้ไหมจิ๊บๆ",
             error: true
         });
     }

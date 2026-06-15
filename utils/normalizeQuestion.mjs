@@ -82,11 +82,11 @@ export function adjustScore(
         };
     });
 
-    result.sort(
+    result = result.sort(
         (a, b) =>
             a.adjustedScore -
             b.adjustedScore
-    ).slice(0, 3);;
+    ).slice(0, 3);
 
     return result;
 }

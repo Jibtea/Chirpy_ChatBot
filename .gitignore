@@ -1,6 +1,7 @@
 # dependencies
 node_modules/
 
+
 # env file 
 .env
 
@@ -40,3 +41,5 @@ coverage/
 
 #resourcres
 resources/
+
+data/
