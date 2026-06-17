@@ -12,6 +12,8 @@ import { createFAQFuse, searchFAQ } from "../services/faqService.mjs";
 
 const faqFuse = await createFAQFuse();
 
+let oldResult = [];
+
 //==========find by intent=========//
 const {
     productSearchData,
@@ -155,14 +157,12 @@ export async function chatController(req, res) {
         if (result.length === 0) {
             result = fuse.search(cleanQuestion);
         } if (result.length === 0) {
-            result =
-                searchData.map(
-                    item => ({
-                        item,
-                        score: 1
-                    })
-                );
+            result = oldResult;
         }
+
+        oldResult = result;
+
+
 
         //==============Ranking==============//
 
@@ -209,7 +209,7 @@ export async function chatController(req, res) {
 
             return res.status(429).json({
                 answer:
-                    "🐦 เชอร์ปี้บินเหนื่อยแล้วจิ๊บ ๆ ตอนนี้ถามครบ 5 คำถามใน 1 นาทีแล้ว รอสักครู่แล้วมาคุยกันใหม่นะ 🌿",
+                    "🐦 เชอร์ปี้บินเหนื่อยแล้วจิ๊บ ๆ เชอร์บี้ขอพักครู่แล้วมาคุยกันใหม่นะ 🌿",
                 error: true
             });
         }
@@ -238,7 +238,7 @@ export async function chatController(req, res) {
 
         return res.status(500).json({
             answer:
-                "🐦 เชอร์ปี้บินเหนื่อยนิดหน่อย ลองใหม่อีกทีนะจิ๊บ ๆ",
+                "🐦 เชอร์ปี้ยุ่งนิดหน่อย ลองถามใหม่อีกทีนะจิ๊บ ๆ",
             error: true
         });
     }
