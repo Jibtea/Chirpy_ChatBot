@@ -5,7 +5,9 @@ export function getSession(sessionId) {
     if (!sessions[sessionId]) {
         sessions[sessionId] = {
             lastResults: null,
-            history: []
+            history: [],
+            // Rate Limit
+            requests: []
         };
     }
 
@@ -36,4 +38,30 @@ export function updateHistory(
 
     session.history =
         session.history.slice(-5);
+}
+
+export function checkRateLimit(sessionId) {
+
+    const session = getSession(sessionId);
+
+    const now = Date.now();
+
+
+    // เก็บเฉพาะคำถามใน 1 นาทีล่าสุด
+    session.requests = session.requests.filter(
+        time => now - time < 60 * 1000
+    );
+
+
+    // ถ้าเกิน 5 ครั้ง
+    if (session.requests.length >= 5) {
+
+        return false;
+    }
+
+
+    // บันทึกเวลาการถามครั้งใหม่
+    session.requests.push(now);
+
+    return true;
 }
