@@ -32,7 +32,7 @@ export function getIntent(question) {
         return "recommend";
     }
 
-    if (/ซื้อ|ลิงก์|ลิ้งก์|link|สั่งซื้อ|สั่ง|กดตะกร้า|เอาสินค้านี้/.test(question))
+    if (/ซื้อ|ลิงก์|ลิ้งก์|link|สั่งซื้อ|สั่ง|กดตะกร้า|เอาสินค้านี้|ไปเลย|เอาอันนี้|จัด|เอา/.test(question))
         return "buy";
 
     return "chat";
@@ -71,7 +71,7 @@ export function createFuse(searchData) {
 
         ],
 
-        threshold: 0.5,
+        threshold: 0.7,
 
         includeScore: true,
 

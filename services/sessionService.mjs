@@ -1,3 +1,5 @@
+import { request } from "express";
+
 const sessions = {};
 
 export function getSession(sessionId) {
@@ -7,7 +9,10 @@ export function getSession(sessionId) {
             lastResults: null,
             history: [],
             // Rate Limit
-            requests: []
+            requests: [],
+            
+            questionCount: 0,
+            lastActive: Date.now()
         };
     }
 
@@ -62,6 +67,29 @@ export function checkRateLimit(sessionId) {
 
     // บันทึกเวลาการถามครั้งใหม่
     session.requests.push(now);
+    console.log(session.requests);
+    console.log("dddd");
 
     return true;
+}
+
+// =================================================== //
+
+export function updateQuestionCount(sessionId) {
+
+    const session =
+        getSession(sessionId);
+
+    const now = Date.now();
+
+    // ถ้าห่างเกิน 10 นาที รีเซ็ต
+    if (now - session.lastActive > 10 * 60 * 1000) {
+        session.questionCount = 0;
+    }
+
+    session.questionCount++;
+
+    session.lastActive = now;
+
+    return session.questionCount;
 }

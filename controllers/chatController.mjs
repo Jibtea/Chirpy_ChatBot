@@ -1,12 +1,13 @@
 // import { createFuse } from "./services/searchService.mjs";
 import { askGemini, buildPrompt } from "../services/geminiService.mjs";
-import { getSession, sessionSet, updateHistory, checkRateLimit } from "../services/sessionService.mjs";
+import { getSession, sessionSet, updateHistory, checkRateLimit, updateQuestionCount } from "../services/sessionService.mjs";
 import { getIntent, buildContext, createFuse } from "../services/intentSearchContextService.mjs";
 
 import { normalizeQuestion, adjustScore } from "../utils/normalizeQuestion.mjs";
 import { getSearchData } from "../services/searchDataService.mjs";
 
 import { createFAQFuse, searchFAQ } from "../services/faqService.mjs";
+
 
 
 
@@ -34,11 +35,23 @@ const allFuse = createFuse([
 
 export async function chatController(req, res) {
 
-    const sessionId =
-        req.body.sessionId || "guest";
+    const sessionId = req.body.sessionId || "guest";
 
-    const session =
-        getSession(sessionId);
+    const session = getSession(sessionId);
+
+    const count = updateQuestionCount(sessionId);
+
+    //=============== check limit ========//
+        if (!checkRateLimit(sessionId)) {
+
+            return res.status(429).json({
+                answer:
+                    "ลุงขอพักซักหน่อย ไว้มาถามลุงใหม่นะ",
+                error: true,
+                showAdmin: session.questionCount >= 5
+            });
+        }
+    // ---------------------------------------------
 
     try {
 
@@ -49,26 +62,6 @@ export async function chatController(req, res) {
             req.body.message
         );
 
-        //=========FAQ=========//
-        const faqAnswer =
-            searchFAQ(
-                faqFuse,
-                question
-            );
-
-        if (faqAnswer) {
-
-            updateHistory(
-                sessionId,
-                question,
-                faqAnswer
-            );
-
-            return res.json({
-                answer: faqAnswer
-            });
-
-        }
 
         //========Intent================//
 
@@ -121,7 +114,8 @@ export async function chatController(req, res) {
             console.log("price");
 
             return res.json({
-                answer
+                answer,
+                showAdmin: session.questionCount >= 5
             });
         }
 
@@ -130,9 +124,14 @@ export async function chatController(req, res) {
             session.lastResults
         ) {
 
-            const answer =
-                `ซื้อได้ที่ ${session.lastResults.raw.name} นะ\n` +
-                `ลิงก์นี้เลยจิ๊บ : ${session.lastResults.raw.link} เดี๋ยวเชอรปี้พาไปนะจิ๊บๆ`;
+            const link = session.lastResults.raw.link?.trim();
+
+            let answer =
+                `ซื้อได้ที่"${session.lastResults.raw.origin}"นะจ๊ะ`;
+
+            if (link) {
+                answer += `\nลิงก์นี้เลยจ้า : ${link}`;
+            }
 
             updateHistory(
                 sessionId,
@@ -145,8 +144,32 @@ export async function chatController(req, res) {
                 answer,
                 link:
                     session.lastResults.raw
-                        .link
+                        .link,
+                showAdmin: session.questionCount >= 5
             });
+        }
+
+
+        //=========FAQ=========//
+        const faqAnswer =
+            searchFAQ(
+                faqFuse,
+                question
+            );
+
+        if (faqAnswer) {
+
+            updateHistory(
+                sessionId,
+                question,
+                faqAnswer
+            );
+
+            return res.json({
+                answer: faqAnswer,
+                showAdmin: session.questionCount >= 5
+            });
+
         }
 
         //============Search====================///
@@ -189,7 +212,7 @@ export async function chatController(req, res) {
                 .map(
                     chat =>
                         `ผู้ใช้: ${chat.question}
-    เชอร์บี้: ${chat.answer}`
+    ลุง: ${chat.answer}`
                 )
                 .join("\n\n");
 
@@ -204,15 +227,6 @@ export async function chatController(req, res) {
 
         // console.log("prompt",prompt);
 
-        //=============== check limit ========//
-        if (!checkRateLimit(sessionId)) {
-
-            return res.status(429).json({
-                answer:
-                    "🐦 เชอร์ปี้บินเหนื่อยแล้วจิ๊บ ๆ เชอร์บี้ขอพักครู่แล้วมาคุยกันใหม่นะ 🌿",
-                error: true
-            });
-        }
 
         //=============== Gemini ============//
 
@@ -229,7 +243,8 @@ export async function chatController(req, res) {
 
         return res.json({
             answer,
-            context
+            context,
+            showAdmin: session.questionCount >= 5
         });
 
     } catch (err) {
@@ -238,8 +253,9 @@ export async function chatController(req, res) {
 
         return res.status(500).json({
             answer:
-                "🐦 เชอร์ปี้ยุ่งนิดหน่อย ลองถามใหม่อีกทีนะจิ๊บ ๆ",
-            error: true
+                "ลุงยุ่งนิดหน่อย ลองถามใหม่อีกทีนะหลานๆ",
+            error: true,
+            showAdmin: session.questionCount >= 5
         });
     }
 

@@ -36,7 +36,7 @@ async function sendMessage() {
             id="${loadingId}"
             class="loading"
         >
-            🧓 ลุงกำลังหาข้อมูล...
+            👴🏼 ลุงกำลังหาข้อมูล...
         </div>
     `;
 

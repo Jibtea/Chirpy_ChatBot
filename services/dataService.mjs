@@ -39,26 +39,27 @@ export async function getProducts() {
 
     return products.map(product => ({
 
-        id: product.id,
+        id: product.product_id,
 
-        name: product.name,
+        name: product.product_name,
 
-        price: product.price,
+        price: product.product_price,
 
-        quantity: product.quantity,
+        quantity: product.product_quantity,
 
-        placeId: product.place_id,
+        // placeId: product.product_place_id,
+        origin: product.product_origin,
 
-        note: product.note,
+        note: product.product_note,
 
-        image: product.image,
+        image: product.product_image,
 
-        highlight: product.highlight,
+        highlight: product.product_highlight,
 
         preorderDate:
-            product.preorder_date,
+            product.product_preorderDate,
 
-        link: product.link
+        link: product.product_link
 
     }));
 }
@@ -73,47 +74,47 @@ export async function getActivities() {
 
     return activities.map(activity => ({
 
-        id: activity.id,
+        id: activity.activity_id,
 
-        name: activity.name,
+        name: activity.activity_name,
 
-        price: activity.price,
+        price: activity.activity_price,
 
         minParticipants:
-            activity.min_participants,
+            activity.activity_min_participants,
 
         maxParticipants:
-            activity.max_participants,
+            activity.activity_max_participants,
 
         date:
-            activity.date,
+            activity.activity_date,
 
         type:
-            activity.type,
+            activity.activity_type,
 
         requirements:
-            activity.participant_requirements,
+            activity.activity_participant_requirements,
 
         includedItems:
-            activity.price_included_items,
+            activity.activity_price_included_items,
 
         location:
-            activity.location,
+            activity.activity_location,
 
         meetingPoint:
-            activity.meeting_point,
+            activity.activity_meeting_point,
 
         description:
-            activity.description,
+            activity.activity_description,
 
         image:
-            activity.image,
+            activity.activity_image,
 
         note:
-            activity.note,
+            activity.activity_note,
 
         by:
-            activity.by
+            activity.activity_by
 
     }));
 

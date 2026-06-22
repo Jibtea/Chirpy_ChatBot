@@ -13,7 +13,7 @@ async function loadChatWidget() {
     initChatWidget();
 }
 
-function showLoading(messages) {
+async function showLoading(messages) {
 
     const loading = document.createElement("div");
     loading.className = "loading";
@@ -102,7 +102,7 @@ function initChatWidget() {
         `;
 
         input.value = "";
-        const loading = showLoading(messages);
+        const loading = await showLoading(messages);
 
         const response =
             await fetch("/chat", {
@@ -120,6 +120,8 @@ function initChatWidget() {
         loading.remove();
 
         const data = await response.json();
+        console.log(data);
+        if(data.showAdmin){ showAdminButton(); }
 
         messages.innerHTML += `
     <div class="bot-message">
@@ -156,8 +158,8 @@ function showBuyLoading() {
 
     div.innerHTML = `
         <div class="buy-box">
-            <div class="spinner">🐦</div>
-            <div>เชอร์บี้กำลังพาไปหน้าซื้อให้นะ...</div>
+            <div class="spinner">👴🏼</div>
+            <div>ลุงกำลังพาหลานไปนะ...</div>
         </div>
     `;
 
@@ -165,3 +167,38 @@ function showBuyLoading() {
 
     return div;
 }
+
+//============admin=================//
+function showAdminButton() {
+
+    const btn =
+        document.getElementById("admin-btn");
+
+    btn.classList.remove("hidden");
+
+    btn.innerHTML =
+        "💬 ติดต่อทีมงาน";
+
+    btn.classList.remove("small");
+
+
+    // เด้งเรียกความสนใจ
+    btn.classList.add("attention");
+
+
+    // เอา class ออกหลังเด้งเสร็จ
+    setTimeout(() => {
+        btn.classList.remove("attention");
+    }, 2000);
+
+
+    // ย่อเป็นไอคอนหลัง 8 วิ
+    setTimeout(() => {
+
+        btn.innerHTML = "💬";
+
+        btn.classList.add("small");
+
+    }, 8000);
+}
+

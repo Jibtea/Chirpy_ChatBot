@@ -42,9 +42,16 @@ export async function createFAQFuse() {
         "./data/faq.csv"
     );
 
+    //  console.log(faqData);
+
+    const formattedFAQ = faqData.map(faq => ({
+        ...faq,
+        question: faq.question.split("|")
+    }));
+
 
     return new Fuse(
-        faqData,
+        formattedFAQ,
         {
             keys: [
                 {
@@ -52,7 +59,7 @@ export async function createFAQFuse() {
                     weight: 1
                 }
             ],
-            threshold: 0.3,
+            threshold: 0.2,
             ignoreLocation: true,
             includeScore: true
         }
@@ -60,12 +67,20 @@ export async function createFAQFuse() {
 }
 
 
+// ----------------- ตัดคำน้า -------------------
+function normalizeFAQQuestion(question) {
+    return question
+        .replace(/จ้า|จ๊ะ|จ๋า|ครับ|ค่ะ|คับ/g, "")
+        .trim();
+}
+
 // ================= Search FAQ =================
 
 export function searchFAQ(
     fuse,
     question
 ) {
+    question = normalizeFAQQuestion(question);
 
     const result =
         fuse.search(question);
