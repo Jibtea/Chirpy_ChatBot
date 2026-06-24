@@ -62,11 +62,26 @@ function initChatWidget() {
             "messages"
         );
 
+    const botMessage = document.getElementById("botMessage");
+    let timer;
+    botMessage.classList.add("show");
+
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+        message.classList.remove("show");
+    }, 5000);
+
     chatBtn.onclick = () => {
 
         chatBox.classList.toggle(
             "hidden"
         );
+
+        if (botMessage.classList.contains("show")) {
+            botMessage.classList.remove("show");
+        } else {
+            showMessage();
+        }
     };
 
     closeBtn.onclick = () => {
@@ -121,7 +136,7 @@ function initChatWidget() {
 
         const data = await response.json();
         console.log(data);
-        if(data.showAdmin){ showAdminButton(); }
+        if (data.showAdmin) { showAdminButton(); }
 
         messages.innerHTML += `
     <div class="bot-message">
@@ -158,7 +173,7 @@ function showBuyLoading() {
 
     div.innerHTML = `
         <div class="buy-box">
-            <div class="spinner">👴🏼</div>
+            <div class="spinner"></div>
             <div>ลุงกำลังพาหลานไปนะ...</div>
         </div>
     `;

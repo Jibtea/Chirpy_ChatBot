@@ -126,8 +126,13 @@ export async function chatController(req, res) {
 
             const link = session.lastResults.raw.link?.trim();
 
-            let answer =
-                `ซื้อได้ที่"${session.lastResults.raw.origin}"นะจ๊ะ`;
+            const place = session.lastResults.raw.origin;
+            let answer = `ซื้อได้ที่"${session.lastResults.raw.origin}"นะจ๊ะ`;
+            if(place){
+                answer =
+                `ซื้อได้ที่"${place}"นะจ๊ะ`;
+            }else{answer =
+                `ลุงขอสอบถามแอดมินก่อนนะจ๊ะ`;}
 
             if (link) {
                 answer += `\nลิงก์นี้เลยจ้า : ${link}`;
